@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enquete — Workshops e Cursos em Educação Física</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .option-card {
+      transition: all 0.16s ease;
+    }
+    .option-card:active {
+      transform: scale(0.99);
+    }
+    .fade-in {
+      animation: fadeIn 0.25s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-orange-100 selection:text-orange-900">
+
+  <!-- Sticky Top Progress & Header -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200">
+    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FF5A00] text-white font-extrabold text-sm shadow-sm">
+          EF
+        </span>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold uppercase tracking-wider text-[#FF5A00]">Enquete Rápida</p>
+          <h1 class="text-sm sm:text-base font-bold text-slate-900 truncate">Workshops &amp; Cursos</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="btn-share-poll" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
+          <span>📲</span>
+          <span class="hidden sm:inline">Compartilhar no</span>
+          <span>WhatsApp</span>
+        </button>
+      </div>
+    </div>
+    <!-- Progress bar -->
+    <div class="w-full h-1 bg-slate-100">
+      <div id="progress-bar" class="h-1 bg-[#FF5A00] transition-all duration-300" style="width: 0%;"></div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 w-full max-w-2xl mx-auto px-4 py-6 sm:py-8">
+
+    <!-- Intro Banner -->
+    <section id="intro-banner" class="bg-slate-900 text-white rounded-2xl p-5 sm:p-6 mb-6 shadow-sm relative overflow-hidden">
+      <div class="relative z-10">
+        <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#FF5A00]/20 text-orange-300 border border-[#FF5A00]/40 mb-3">
+          ⏱️ Leva menos de 2 minutos
+        </span>
+        <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight mb-2">
+          Escolha os próximos temas de Workshops e Cursos em Educação Física
+        </h2>
+        <p class="text-sm text-slate-300 leading-relaxed">
+          Queremos montar uma programação prática e alinhada ao que você realmente precisa no dia a dia profissional ou acadêmico. Ao final, você pode enviar suas respostas direto pelo WhatsApp.
+        </p>
+      </div>
+    </section>
+
+    <!-- Form View -->
+    <form id="poll-form" class="space-y-6" novalidate>
+
+      <!-- Bloco 1: Perfil -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <span class="text-xs font-bold uppercase tracking-wider text-[#FF5A00]">Bloco 1 de 4</span>
+          <span class="text-xs font-medium text-slate-400">Obrigatório</span>
+        </div>
+        <h3 class="text-base sm:text-lg font-bold text-slate-900 mb-3">Qual é a sua atuação atual?</h3>
+        <div id="profile-options" class="grid grid-cols-1 gap-2.5" role="radiogroup" aria-label="Atuação atual"></div>
+
+        <div id="profile-other-wrap" class="mt-3 hidden fade-in">
+          <label for="profile-other-input" class="block text-xs font-semibold text-slate-600 mb-1">Especifique sua atuação:</label>
+          <input id="profile-other-input" type="text" placeholder="Ex.: Fisioterapeuta, Docente universitário..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5A00] focus:border-transparent" />
+        </div>
+        <p id="err-profile" class="hidden text-xs font-semibold text-rose-600 mt-2">Selecione uma opção de atuação para continuar.</p>
+      </section>
+
+      <!-- Bloco 2: Temas -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <span class="text-xs font-bold uppercase tracking-wider text-[#FF5A00]">Bloco 2 de 4</span>
+          <span id="topic-counter" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">0 / 3 selecionados</span>
+        </div>
+        <h3 class="text-base sm:text-lg font-bold text-slate-900 mb-1">Quais temas você teria mais interesse em participar?</h3>
+        <p class="text-xs sm:text-sm text-slate-500 mb-4">Escolha até 3 opções prioritárias para você.</p>
+
+        <div id="topic-options" class="grid grid-cols-1 gap-2.5"></div>
+
+        <div class="mt-4">
+          <label for="custom-topic" class="block text-xs font-semibold text-slate-700 mb-1.5">
+            Algum tema específico que não está na lista? (opcional)
+          </label>
+          <input id="custom-topic" type="text" placeholder="Ex.: Treinamento para corrida de rua, Periodização no Pilates..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5A00] focus:border-transparent" />
+        </div>
+        <p id="err-topics" class="hidden text-xs font-semibold text-rose-600 mt-2">Escolha pelo menos 1 tema de interesse (máximo 3).</p>
+      </section>
+
+      <!-- Bloco 3: Formato e Logística -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-5">
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <span class="text-xs font-bold uppercase tracking-wider text-[#FF5A00]">Bloco 3 de 4</span>
+            <span class="text-xs font-medium text-slate-400">Obrigatório</span>
+          </div>
+          <h3 class="text-base sm:text-lg font-bold text-slate-900 mb-3">Qual formato você prefere?</h3>
+          <div id="format-options" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" role="radiogroup" aria-label="Formato preferido"></div>
+          <p id="err-format" class="hidden text-xs font-semibold text-rose-600 mt-2">Selecione o formato de sua preferência.</p>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100">
+          <h4 class="text-sm sm:text-base font-bold text-slate-900 mb-3">Qual carga horária funciona melhor para você?</h4>
+          <div id="duration-options" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5" role="radiogroup" aria-label="Carga horária"></div>
+          <p id="err-duration" class="hidden text-xs font-semibold text-rose-600 mt-2">Selecione uma carga horária.</p>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100">
+          <h4 class="text-sm sm:text-base font-bold text-slate-900 mb-1">Qual é o melhor dia e horário?</h4>
+          <p class="text-xs text-slate-500 mb-3">Você pode marcar mais de uma opção.</p>
+          <div id="schedule-options" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
+        </div>
+      </section>
+
+      <!-- Bloco 4: Contato Opcional -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <span class="text-xs font-bold uppercase tracking-wider text-[#FF5A00]">Bloco 4 de 4</span>
+          <span class="text-xs font-medium text-slate-400">Opcional</span>
+        </div>
+        <h3 class="text-base sm:text-lg font-bold text-slate-900 mb-1">Quer ser avisado(a) em primeira mão?</h3>
+        <p class="text-xs sm:text-sm text-slate-500 mb-4">Deixe seu nome e WhatsApp ou e-mail para receber o calendário assim que as turmas abrirem.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="contact-name" class="block text-xs font-semibold text-slate-700 mb-1">Seu nome</label>
+            <input id="contact-name" type="text" placeholder="Ex.: Ana Paula" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5A00] focus:border-transparent" />
+          </div>
+          <div>
+            <label for="contact-info" class="block text-xs font-semibold text-slate-700 mb-1">WhatsApp ou E-mail</label>
+            <input id="contact-info" type="text" placeholder="(66) 99999-9999 ou email@..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5A00] focus:border-transparent" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Submit Actions -->
+      <div class="flex flex-col sm:flex-row gap-3 pt-1">
+        <button id="btn-submit" type="submit" class="flex-1 py-3.5 px-6 rounded-xl bg-[#FF5A00] hover:bg-[#e55000] text-white font-bold text-sm sm:text-base shadow-sm transition flex items-center justify-center gap-2">
+          <span>Finalizar e Gerar Resumo</span>
+          <span>→</span>
+        </button>
+        <button id="btn-reset" type="button" class="py-3.5 px-5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm transition">
+          Limpar
+        </button>
+      </div>
+    </form>
+
+    <!-- Summary / Result View (shown after submit) -->
+    <section id="result-view" class="hidden fade-in space-y-5">
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 text-lg">✓</span>
+          <div>
+            <h3 class="text-lg font-extrabold text-slate-900">Respostas registradas!</h3>
+            <p class="text-xs sm:text-sm text-slate-500">Envie o resumo abaixo pelo WhatsApp para o organizador ou copie para enviar em outro canal.</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-5">
+          <pre id="summary-preview" class="whitespace-pre-wrap font-sans text-xs sm:text-sm text-slate-800 leading-relaxed"></pre>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <a id="btn-send-whatsapp" href="#" target="_blank" rel="noopener noreferrer" class="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm text-center transition flex items-center justify-center gap-2 shadow-sm">
+            <span>📲</span>
+            <span>Enviar no WhatsApp</span>
+          </a>
+          <button id="btn-copy-summary" type="button" class="py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition flex items-center justify-center gap-2">
+            <span>📋</span>
+            <span>Copiar Resumo</span>
+          </button>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+          <button id="btn-edit-answers" type="button" class="text-xs font-semibold text-slate-600 hover:text-[#FF5A00] transition">
+            ← Editar minhas respostas
+          </button>
+          <button id="btn-new-response" type="button" class="text-xs font-semibold text-[#FF5A00] hover:underline">
+            Preencher nova resposta
+          </button>
+        </div>
+      </div>
+
+      <!-- Local Session Counter -->
+      <div id="local-stats-card" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <h4 class="text-sm font-bold text-slate-900">Votos salvos neste navegador</h4>
+          <span id="total-votes-badge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-orange-100 text-[#FF5A00]">0 respostas</span>
+        </div>
+        <div id="local-stats-bars" class="space-y-2.5"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="max-w-2xl w-full mx-auto px-4 py-6 text-center text-xs text-slate-400">
+    Enquete de Temas — Workshops e Cursos em Educação Física
+  </footer>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-semibold shadow-lg">
+  </div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'ef_workshop_poll_responses_v1';
+
+      const PROFILE_OPTIONS = [
+        'Estudante de Educação Física',
+        'Personal Trainer / Treinador autônomo',
+        'Professor(a) de musculação, funcional ou studio',
+        'Gestor(a) ou coordenador(a) de academia',
+        'Outro'
+      ];
+
+      const TOPIC_OPTIONS = [
+        {
+          id: 'biomecanica',
+          title: 'Biomecânica aplicada à musculação',
+          desc: 'Análise de alavancas, seleção de exercícios e ajustes articulares na prática'
+        },
+        {
+          id: 'forca_hipertrofia',
+          title: 'Prescrição de força e hipertrofia',
+          desc: 'Controle de volume, intensidade e periodização baseada em evidências'
+        },
+        {
+          id: 'funcional_lesoes',
+          title: 'Treinamento funcional e prevenção de lesões',
+          desc: 'Avaliação do movimento, estabilidade e progressões seguras'
+        },
+        {
+          id: 'idosos_especiais',
+          title: 'Treinamento para idosos e populações especiais',
+          desc: 'Força, autonomia, sarcopenia e segurança clínica'
+        },
+        {
+          id: 'avaliacao_carga',
+          title: 'Avaliação física e monitoramento de carga',
+          desc: 'Protocolos práticos para acompanhar resultados reais'
+        },
+        {
+          id: 'atendimento_fidelizacao',
+          title: 'Atendimento e fidelização na sala de musculação',
+          desc: 'Postura profissional, comunicação e retenção de alunos'
+        },
+        {
+          id: 'tecnologia_ia',
+          title: 'Tecnologia e IA na Educação Física',
+          desc: 'Uso de ferramentas digitais e inteligência artificial na prescrição e gestão de treinos'
+        }
+      ];
+
+      const FORMAT_OPTIONS = [
+        'Workshop prático presencial',
+        'Curso teórico-prático presencial',
+        'Minicurso online ao vivo',
+        'Formato híbrido (online + presencial)'
+      ];
+
+      const DURATION_OPTIONS = [
+        '2h a 4h (Workshop rápido)',
+        '8h (Imersão de 1 dia)',
+        '12h a 16h (Fim de semana)'
+      ];
+
+      const SCHEDULE_OPTIONS = [
+        'Sábado pela manhã',
+        'Sábado à tarde',
+        'Domingo pela manhã',
+        'Dias de semana à noite'
+      ];
+
+      const state = {
+        profile: '',
+        profileOther: '',
+        topics: [],
+        customTopic: '',
+        format: '',
+        duration: '',
+        schedules: [],
+        contactName: '',
+        contactInfo: ''
+      };
+
+      const el = {
+        form: document.getElementById('poll-form'),
+        introBanner: document.getElementById('intro-banner'),
+        resultView: document.getElementById('result-view'),
+        progressBar: document.getElementById('progress-bar'),
+        profileOptions: document.getElementById('profile-options'),
+        profileOtherWrap: document.getElementById('profile-other-wrap'),
+        profileOtherInput: document.getElementById('profile-other-input'),
+        topicOptions: document.getElementById('topic-options'),
+        topicCounter: document.getElementById('topic-counter'),
+        customTopic: document.getElementById('custom-topic'),
+        formatOptions: document.getElementById('format-options'),
+        durationOptions: document.getElementById('duration-options'),
+        scheduleOptions: document.getElementById('schedule-options'),
+        contactName: document.getElementById('contact-name'),
+        contactInfo: document.getElementById('contact-info'),
+        errProfile: document.getElementById('err-profile'),
+        errTopics: document.getElementById('err-topics'),
+        errFormat: document.getElementById('err-format'),
+        errDuration: document.getElementById('err-duration'),
+        summaryPreview: document.getElementById('summary-preview'),
+        btnSendWhatsapp: document.getElementById('btn-send-whatsapp'),
+        btnCopySummary: document.getElementById('btn-copy-summary'),
+        btnEditAnswers: document.getElementById('btn-edit-answers'),
+        btnNewResponse: document.getElementById('btn-new-response'),
+        btnReset: document.getElementById('btn-reset'),
+        btnSharePoll: document.getElementById('btn-share-poll'),
+        totalVotesBadge: document.getElementById('total-votes-badge'),
+        localStatsBars: document.getElementById('local-stats-bars'),
+        toast: document.getElementById('toast')
+      };
+
+      let toastTimer = null;
+
+      function showToast(message) {
+        if (toastTimer) clearTimeout(toastTimer);
+        el.toast.textContent = message;
+        el.toast.classList.remove('hidden');
+        toastTimer = setTimeout(() => {
+          el.toast.classList.add('hidden');
+        }, 2600);
+      }
+
+      function updateProgress() {
+        let score = 0;
+        if (state.profile) score += 25;
+        if (state.topics.length > 0) score += 25;
+        if (state.format) score += 25;
+        if (state.duration) score += 25;
+        el.progressBar.style.width = score + '%';
+      }
+
+      function renderSingleChoiceGroup(container, options, selectedValue, onSelect) {
+        container.innerHTML = '';
+        options.forEach((opt) => {
+          const active = selectedValue === opt;
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.setAttribute('role', 'radio');
+          btn.setAttribute('aria-checked', String(active));
+          btn.className =
+            'option-card text-left w-full px-4 py-3 rounded-xl border text-sm font-medium flex items-center justify-between gap-3 ' +
+            (active
+              ? 'border-[#FF5A00] bg-orange-50/70 text-slate-900 ring-1 ring-[#FF5A00]'
+              : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50');
+
+          const labelSpan = document.createElement('span');
+          labelSpan.textContent = opt;
+
+          const dot = document.createElement('span');
+          dot.className =
+            'h-4 w-4 shrink-0 rounded-full border flex items-center justify-center ' +
+            (active ? 'border-[#FF5A00] bg-[#FF5A00]' : 'border-slate-300 bg-white');
+          if (active) {
+            const inner = document.createElement('span');
+            inner.className = 'h-1.5 w-1.5 rounded-full bg-white';
+            dot.appendChild(inner);
+          }
+
+          btn.appendChild(labelSpan);
+          btn.appendChild(dot);
+          btn.addEventListener('click', () => onSelect(opt));
+          container.appendChild(btn);
+        });
+      }
+
+      function renderProfile() {
+        renderSingleChoiceGroup(el.profileOptions, PROFILE_OPTIONS, state.profile, (opt) => {
+          state.profile = opt;
+          el.errProfile.classList.add('hidden');
+          if (opt === 'Outro') {
+            el.profileOtherWrap.classList.remove('hidden');
+            el.profileOtherInput.focus();
+          } else {
+            el.profileOtherWrap.classList.add('hidden');
+          }
+          renderProfile();
+          updateProgress();
+        });
+      }
+
+      function renderTopics() {
+        el.topicOptions.innerHTML = '';
+        el.topicCounter.textContent = state.topics.length + ' / 3 selecionados';
+        el.topicCounter.className =
+          'text-xs font-bold px-2.5 py-0.5 rounded-full ' +
+          (state.topics.length === 3
+            ? 'bg-orange-100 text-[#FF5A00]'
+            : 'bg-slate-100 text-slate-700');
+
+        TOPIC_OPTIONS.forEach((topic) => {
+          const active = state.topics.includes(topic.id);
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.setAttribute('aria-pressed', String(active));
+          btn.className =
+            'option-card text-left w-full p-3.5 rounded-xl border flex items-start justify-between gap-3 ' +
+            (active
+              ? 'border-[#FF5A00] bg-orange-50/70 ring-1 ring-[#FF5A00]'
+              : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50');
+
+          const textWrap = document.createElement('div');
+          const title = document.createElement('p');
+          title.className = 'text-sm font-bold text-slate-900';
+          title.textContent = topic.title;
+
+          const desc = document.createElement('p');
+          desc.className = 'text-xs text-slate-500 mt-0.5';
+          desc.textContent = topic.desc;
+
+          textWrap.appendChild(title);
+          textWrap.appendChild(desc);
+
+          const check = document.createElement('span');
+          check.className =
+            'mt-0.5 h-5 w-5 shrink-0 rounded-md border flex items-center justify-center text-xs font-bold ' +
+            (active
+              ? 'border-[#FF5A00] bg-[#FF5A00] text-white'
+              : 'border-slate-300 bg-white text-transparent');
+          check.textContent = '✓';
+
+          btn.appendChild(textWrap);
+          btn.appendChild(check);
+
+          btn.addEventListener('click', () => {
+            if (active) {
+              state.topics = state.topics.filter((id) => id !== topic.id);
+            } else {
+              if (state.topics.length >= 3) {
+                showToast('Você já escolheu 3 temas. Desmarque um para trocar.');
+                return;
+              }
+              state.topics = [...state.topics, topic.id];
+            }
+            el.errTopics.classList.add('hidden');
+            renderTopics();
+            updateProgress();
+          });
+
+          el.topicOptions.appendChild(btn);
+        });
+      }
+
+      function renderFormat() {
+        renderSingleChoiceGroup(el.formatOptions, FORMAT_OPTIONS, state.format, (opt) => {
+          state.format = opt;
+          el.errFormat.classList.add('hidden');
+          renderFormat();
+          updateProgress();
+        });
+      }
+
+      function renderDuration() {
+        renderSingleChoiceGroup(el.durationOptions, DURATION_OPTIONS, state.duration, (opt) => {
+          state.duration = opt;
+          el.errDuration.classList.add('hidden');
+          renderDuration();
+          updateProgress();
+        });
+      }
+
+      function renderSchedules() {
+        el.scheduleOptions.innerHTML = '';
+        SCHEDULE_OPTIONS.forEach((opt) => {
+          const active = state.schedules.includes(opt);
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.setAttribute('aria-pressed', String(active));
+          btn.className =
+            'option-card text-left w-full px-4 py-3 rounded-xl border text-sm font-medium flex items-center justify-between gap-3 ' +
+            (active
+              ? 'border-[#FF5A00] bg-orange-50/70 text-slate-900 ring-1 ring-[#FF5A00]'
+              : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50');
+
+          const labelSpan = document.createElement('span');
+          labelSpan.textContent = opt;
+
+          const box = document.createElement('span');
+          box.className =
+            'h-4 w-4 shrink-0 rounded border flex items-center justify-center text-[10px] font-bold ' +
+            (active
+              ? 'border-[#FF5A00] bg-[#FF5A00] text-white'
+              : 'border-slate-300 bg-white text-transparent');
+          box.textContent = '✓';
+
+          btn.appendChild(labelSpan);
+          btn.appendChild(box);
+
+          btn.addEventListener('click', () => {
+            if (active) {
+              state.schedules = state.schedules.filter((s) => s !== opt);
+            } else {
+              state.schedules = [...state.schedules, opt];
+            }
+            renderSchedules();
+          });
+
+          el.scheduleOptions.appendChild(btn);
+        });
+      }
+
+      function loadSavedResponses() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function saveResponse(entry) {
+        try {
+          const list = loadSavedResponses();
+          list.push(entry);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+          return list;
+        } catch (e) {
+          return [entry];
+        }
+      }
+
+      function renderLocalStats(responses) {
+        const total = responses.length;
+        el.totalVotesBadge.textContent = total + (total === 1 ? ' resposta' : ' respostas');
+        el.localStatsBars.innerHTML = '';
+
+        const counts = {};
+        TOPIC_OPTIONS.forEach((t) => { counts[t.id] = 0; });
+        responses.forEach((r) => {
+          (r.topics || []).forEach((id) => {
+            if (counts[id] !== undefined) counts[id] += 1;
+          });
+        });
+
+        const sorted = [...TOPIC_OPTIONS].sort((a, b) => counts[b.id] - counts[a.id]);
+        sorted.forEach((topic) => {
+          const count = counts[topic.id];
+          const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+
+          const row = document.createElement('div');
+          row.className = 'space-y-1';
+
+          const top = document.createElement('div');
+          top.className = 'flex items-center justify-between text-xs';
+
+          const name = document.createElement('span');
+          name.className = 'font-medium text-slate-700 truncate pr-2';
+          name.textContent = topic.title;
+
+          const val = document.createElement('span');
+          val.className = 'font-bold text-slate-900 shrink-0';
+          val.textContent = count + ' (' + pct + '%)';
+
+          top.appendChild(name);
+          top.appendChild(val);
+
+          const track = document.createElement('div');
+          track.className = 'w-full h-2 rounded-full bg-slate-100 overflow-hidden';
+          const fill = document.createElement('div');
+          fill.className = 'h-full rounded-full bg-[#FF5A00] transition-all duration-300';
+          fill.style.width = pct + '%';
+          track.appendChild(fill);
+
+          row.appendChild(top);
+          row.appendChild(track);
+          el.localStatsBars.appendChild(row);
+        });
+      }
+
+      function buildSummaryText() {
+        const profileText =
+          state.profile === 'Outro' && state.profileOther.trim()
+            ? 'Outro (' + state.profileOther.trim() + ')'
+            : state.profile;
+
+        const selectedTopicTitles = state.topics
+          .map((id) => {
+            const found = TOPIC_OPTIONS.find((t) => t.id === id);
+            return found ? '• ' + found.title : '';
+          })
+          .filter(Boolean);
+
+        const lines = [
+          '*Enquete — Workshops e Cursos em Educação Física*',
+          '',
+          '*Atuação:* ' + profileText,
+          '*Temas de interesse:*',
+          ...selectedTopicTitles
+        ];
+
+        if (state.customTopic.trim()) {
+          lines.push('• Sugestão extra: ' + state.customTopic.trim());
+        }
+
+        lines.push('');
+        lines.push('*Formato preferido:* ' + state.format);
+        lines.push('*Carga horária:* ' + state.duration);
+
+        if (state.schedules.length > 0) {
+          lines.push('*Melhores horários:* ' + state.schedules.join(', '));
+        }
+
+        if (state.contactName.trim() || state.contactInfo.trim()) {
+          lines.push('');
+          const contactParts = [state.contactName.trim(), state.contactInfo.trim()].filter(Boolean);
+          lines.push('*Contato:* ' + contactParts.join(' — '));
+        }
+
+        return lines.join('\n');
+      }
+
+      function copyText(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(
+            () => showToast('Resumo copiado!'),
+            () => fallbackCopy(text)
+          );
+        } else {
+          fallbackCopy(text);
+        }
+      }
+
+      function fallbackCopy(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast('Resumo copiado!');
+        } catch (e) {
+          showToast('Não foi possível copiar automaticamente.');
+        }
+        document.body.removeChild(ta);
+      }
+
+      function resetFormState() {
+        state.profile = '';
+        state.profileOther = '';
+        state.topics = [];
+        state.customTopic = '';
+        state.format = '';
+        state.duration = '';
+        state.schedules = [];
+        state.contactName = '';
+        state.contactInfo = '';
+
+        el.profileOtherInput.value = '';
+        el.profileOtherWrap.classList.add('hidden');
+        el.customTopic.value = '';
+        el.contactName.value = '';
+        el.contactInfo.value = '';
+
+        el.errProfile.classList.add('hidden');
+        el.errTopics.classList.add('hidden');
+        el.errFormat.classList.add('hidden');
+        el.errDuration.classList.add('hidden');
+
+        renderProfile();
+        renderTopics();
+        renderFormat();
+        renderDuration();
+        renderSchedules();
+        updateProgress();
+      }
+
+      // Event Listeners
+      el.profileOtherInput.addEventListener('input', (e) => {
+        state.profileOther = e.target.value;
+      });
+      el.customTopic.addEventListener('input', (e) => {
+        state.customTopic = e.target.value;
+      });
+      el.contactName.addEventListener('input', (e) => {
+        state.contactName = e.target.value;
+      });
+      el.contactInfo.addEventListener('input', (e) => {
+        state.contactInfo = e.target.value;
+      });
+
+      el.form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        let valid = true;
+
+        if (!state.profile) {
+          el.errProfile.classList.remove('hidden');
+          valid = false;
+        }
+        if (state.topics.length === 0) {
+          el.errTopics.classList.remove('hidden');
+          valid = false;
+        }
+        if (!state.format) {
+          el.errFormat.classList.remove('hidden');
+          valid = false;
+        }
+        if (!state.duration) {
+          el.errDuration.classList.remove('hidden');
+          valid = false;
+        }
+
+        if (!valid) {
+          showToast('Preencha os campos obrigatórios destacados.');
+          return;
+        }
+
+        const summary = buildSummaryText();
+        el.summaryPreview.textContent = summary;
+        el.btnSendWhatsapp.href = 'https://wa.me/5565984544975?text=' + encodeURIComponent(summary);
+
+        const allResponses = saveResponse({
+          profile: state.profile,
+          topics: [...state.topics],
+          format: state.format,
+          duration: state.duration,
+          schedules: [...state.schedules],
+          createdAt: new Date().toISOString()
+        });
+        renderLocalStats(allResponses);
+
+        el.form.classList.add('hidden');
+        el.introBanner.classList.add('hidden');
+        el.resultView.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      el.btnCopySummary.addEventListener('click', () => {
+        copyText(el.summaryPreview.textContent || '');
+      });
+
+      el.btnEditAnswers.addEventListener('click', () => {
+        el.resultView.classList.add('hidden');
+        el.form.classList.remove('hidden');
+        el.introBanner.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      el.btnNewResponse.addEventListener('click', () => {
+        resetFormState();
+        el.resultView.classList.add('hidden');
+        el.form.classList.remove('hidden');
+        el.introBanner.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      el.btnReset.addEventListener('click', () => {
+        resetFormState();
+        showToast('Formulário limpo.');
+      });
+
+      el.btnSharePoll.addEventListener('click', () => {
+        const shareMsg =
+          'Olá! Estou montando os próximos Workshops e Cursos em Educação Física e quero ouvir sua opinião. Responda em menos de 2 minutos aqui: ' +
+          window.location.href;
+        window.open('https://wa.me/?text=' + encodeURIComponent(shareMsg), '_blank', 'noopener,noreferrer');
+      });
+
+      // Init
+      renderProfile();
+      renderTopics();
+      renderFormat();
+      renderDuration();
+      renderSchedules();
+      updateProgress();
+    })();
+  </script>
+</body>
+</html>
