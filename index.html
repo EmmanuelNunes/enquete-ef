@@ -112,7 +112,7 @@
           Escolha os próximos temas de Workshops e Cursos em Educação Física
         </h2>
         <p class="text-sm text-slate-300 leading-relaxed max-w-xl">
-          Queremos montar uma programação prática e alinhada ao que você realmente precisa no dia a dia profissional ou acadêmico. Ao final, você pode enviar suas respostas direto pelo WhatsApp.
+          Queremos montar uma programação prática e alinhada ao que você realmente precisa no dia a dia profissional ou acadêmico. Suas respostas são registradas automaticamente ao enviar — e você também pode compartilhar pelo WhatsApp, se desejar.
         </p>
       </div>
     </section>
@@ -204,9 +204,9 @@
 
       <!-- Submit Actions -->
       <div class="flex flex-col sm:flex-row gap-3 pt-1">
-        <button id="btn-submit" type="submit" class="flex-1 py-3.5 px-6 rounded-xl bg-[#FF5200] hover:bg-[#E04800] text-white font-bold text-sm sm:text-base shadow-sm transition flex items-center justify-center gap-2">
-          <span>Finalizar e Gerar Resumo</span>
-          <span>→</span>
+        <button id="btn-submit" type="submit" class="flex-1 py-3.5 px-6 rounded-xl bg-[#FF5200] hover:bg-[#E04800] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm sm:text-base shadow-sm transition flex items-center justify-center gap-2">
+          <span id="btn-submit-label">Enviar Respostas</span>
+          <span id="btn-submit-arrow">→</span>
         </button>
         <button id="btn-reset" type="button" class="py-3.5 px-5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-sm transition">
           Limpar
@@ -221,8 +221,8 @@
           <div class="flex items-center gap-3">
             <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 text-lg font-bold">✓</span>
             <div>
-              <h3 class="text-lg font-extrabold text-[#202221]">Respostas registradas!</h3>
-              <p class="text-xs sm:text-sm text-slate-500">Envie o resumo abaixo pelo WhatsApp para Emmanuel Nunes ou copie para enviar em outro canal.</p>
+              <h3 class="text-lg font-extrabold text-[#202221]">Respostas enviadas com sucesso!</h3>
+              <p id="forms-sync-status" class="text-xs sm:text-sm text-emerald-700 font-medium">Registrado automaticamente no formulário de Emmanuel Nunes.</p>
             </div>
           </div>
           <img
@@ -239,7 +239,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <a id="btn-send-whatsapp" href="#" target="_blank" rel="noopener noreferrer" class="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm text-center transition flex items-center justify-center gap-2 shadow-sm">
             <span>📲</span>
-            <span>Enviar no WhatsApp</span>
+            <span>Enviar também no WhatsApp</span>
           </a>
           <button id="btn-copy-summary" type="button" class="py-3 px-4 rounded-xl bg-[#202221] hover:bg-[#323534] text-white font-bold text-sm transition flex items-center justify-center gap-2">
             <span>📋</span>
@@ -771,7 +771,55 @@
         state.contactInfo = e.target.value;
       });
 
-      el.form.addEventListener('submit', (e) => {
+      const GOOGLE_FORM_ACTION =
+        'https://docs.google.com/forms/d/e/1FAIpQLSdnQdTNNHnWkhhFhtSSK55S_SpbNdq0a1mGIykPr-ahkQHI5w/formResponse';
+
+      const GOOGLE_FORM_FIELDS = {
+        profile: 'entry.1689804242',
+        topics: 'entry.1056632186',
+        customTopic: 'entry.1349669624',
+        format: 'entry.577471793',
+        duration: 'entry.469243084',
+        schedules: 'entry.1790904755',
+        contactName: 'entry.1083841027',
+        contactInfo: 'entry.1780790076'
+      };
+
+      async function submitToGoogleForms() {
+        const profileText =
+          state.profile === 'Outro' && state.profileOther.trim()
+            ? 'Outro (' + state.profileOther.trim() + ')'
+            : state.profile;
+
+        const selectedTopicsText = state.topics
+          .map((id) => {
+            const found = TOPIC_OPTIONS.find((t) => t.id === id);
+            return found ? found.title : '';
+          })
+          .filter(Boolean)
+          .join(' | ');
+
+        const params = new URLSearchParams();
+        params.append(GOOGLE_FORM_FIELDS.profile, profileText);
+        params.append(GOOGLE_FORM_FIELDS.topics, selectedTopicsText);
+        params.append(GOOGLE_FORM_FIELDS.customTopic, state.customTopic.trim());
+        params.append(GOOGLE_FORM_FIELDS.format, state.format);
+        params.append(GOOGLE_FORM_FIELDS.duration, state.duration);
+        params.append(GOOGLE_FORM_FIELDS.schedules, state.schedules.join(', '));
+        params.append(GOOGLE_FORM_FIELDS.contactName, state.contactName.trim());
+        params.append(GOOGLE_FORM_FIELDS.contactInfo, state.contactInfo.trim());
+
+        await fetch(GOOGLE_FORM_ACTION, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          },
+          body: params.toString()
+        });
+      }
+
+      el.form.addEventListener('submit', async (e) => {
         e.preventDefault();
         let valid = true;
 
@@ -795,6 +843,38 @@
         if (!valid) {
           showToast('Preencha os campos obrigatórios destacados.');
           return;
+        }
+
+        const btnSubmit = document.getElementById('btn-submit');
+        const btnSubmitLabel = document.getElementById('btn-submit-label');
+        const btnSubmitArrow = document.getElementById('btn-submit-arrow');
+        const formsSyncStatus = document.getElementById('forms-sync-status');
+
+        btnSubmit.disabled = true;
+        btnSubmitLabel.textContent = 'Enviando respostas...';
+        btnSubmitArrow.classList.add('hidden');
+
+        let syncedToForms = true;
+        try {
+          await submitToGoogleForms();
+        } catch (err) {
+          syncedToForms = false;
+        } finally {
+          btnSubmit.disabled = false;
+          btnSubmitLabel.textContent = 'Enviar Respostas';
+          btnSubmitArrow.classList.remove('hidden');
+        }
+
+        if (formsSyncStatus) {
+          if (syncedToForms) {
+            formsSyncStatus.textContent =
+              'Registrado automaticamente no formulário de Emmanuel Nunes. Se quiser, você também pode enviar pelo WhatsApp abaixo.';
+            formsSyncStatus.className = 'text-xs sm:text-sm text-emerald-700 font-medium';
+          } else {
+            formsSyncStatus.textContent =
+              'Não foi possível enviar automaticamente (verifique sua conexão). Você pode enviar o resumo pelo WhatsApp abaixo.';
+            formsSyncStatus.className = 'text-xs sm:text-sm text-amber-700 font-medium';
+          }
         }
 
         const summary = buildSummaryText();
